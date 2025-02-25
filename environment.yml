@@ -1,0 +1,18 @@
+name: database_access
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - loguru
+  - tqdm
+  - ipython
+  - matplotlib
+  - notebook
+  - numpy
+  - openpyxl
+  - oracledb
+  - pandas
+  - rdkit
+  - pip:
+    - python-dotenv
