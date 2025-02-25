@@ -102,8 +102,9 @@ def organize_results(data: list, sql: str) -> pd.DataFrame:
     """
     cols = get_field_names(sql)
     result = pd.DataFrame(data, columns=cols)
-    result["ROMol"] = result["MOL_CTFILE"].apply(Chem.MolFromMolBlock)
-    result.drop(columns="MOL_CTFILE", inplace=True)
+    if "MOL_CTFILE" in cols:
+        result["ROMol"] = result["MOL_CTFILE"].apply(Chem.MolFromMolBlock)
+        result.drop(columns="MOL_CTFILE", inplace=True)
     return result
 
 
