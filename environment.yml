@@ -7,7 +7,6 @@ dependencies:
   - loguru
   - tqdm
   - ipython
-  - matplotlib
   - notebook
   - numpy
   - openpyxl
