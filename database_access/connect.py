@@ -67,7 +67,7 @@ def search_compounds(cursor, identifiers: Iterable[str], sql: str) -> pd.DataFra
         converted = first_output_to_str(res)  # before closing connection
         result.append(converted)
 
-    # result = organize_results(result, sql)
+    result = organize_results(result, sql)
     return result
 
 
@@ -93,19 +93,23 @@ def first_output_to_str(data: tuple) -> tuple:
 
 def organize_results(data: list, sql: str) -> pd.DataFrame:
     """Transforms query results from list to dataframe. It automatically assigns column
-    names using the corresponding DB fields and adds RDKit.Mol objects.
+    names using the corresponding DB fields and adds RDKit.Mol objects and warnings
+    catched during ct to mol transformation.
 
     Args:
         data (list): information from query.
         sql (str): SQL expression used for query.
 
     Returns:
-        pd.DataFrame: results including rdkit mol object.
+        pd.DataFrame: results including rdkit mol object and possible warnings.
     """
     cols = get_field_names(sql)
     result = pd.DataFrame(data, columns=cols)
     if "MOL_CTFILE" in cols:
-        result["ROMol"] = result["MOL_CTFILE"].apply(Chem.MolFromMolBlock)
+        # result["ROMol"] = result["MOL_CTFILE"].apply(Chem.MolFromMolBlock)
+        mols, messages = transform_ct(result["MOL_CTFILE"])
+        result["ROMol"] = mols
+        result["Warnings"] = messages
         result.drop(columns="MOL_CTFILE", inplace=True)
     return result
 
