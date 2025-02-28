@@ -5,15 +5,17 @@ information, using a custom SQL expression.
 @author: Dr. Freddy A. Bernal
 """
 
+import logging
 import os
 import re
 from functools import wraps
+from io import StringIO
 from typing import Iterable
 
 import oracledb
 import pandas as pd
 from dotenv import load_dotenv
-from rdkit import Chem
+from rdkit import Chem, rdBase
 from tqdm import tqdm
 
 # load keys
@@ -65,7 +67,7 @@ def search_compounds(cursor, identifiers: Iterable[str], sql: str) -> pd.DataFra
         converted = first_output_to_str(res)  # before closing connection
         result.append(converted)
 
-    result = organize_results(result, sql)
+    # result = organize_results(result, sql)
     return result
 
 
@@ -126,3 +128,45 @@ def get_field_names(sql: str) -> list:
     # retrieve actual field name
     fields = [x.split(".")[-1] for x in fields]
     return fields
+
+
+def transform_ct(ct_strs: Iterable[str]) -> tuple[list]:
+    """Convert ct file content into RDKit mol objects while catching warning messages.
+    First transfer logger information from C++ to python as shown in:
+    https://greglandrum.github.io/rdkit-blog/posts/2024-02-23-custom-transformations-and-logging.html
+
+    Args:
+        ct_strs (Iterable[str]): group of chemical table files as strings.
+
+    Returns:
+        tuple: RDKit Mol objects and RDKit warnings as lists.
+    """
+    # Tell the RDKit's C++ backend to log to use the python logger:
+    rdBase.LogToPythonLogger()
+    logger = logging.getLogger("rdkit")
+    # set the log level for the default log handler (the one which sense output
+    # to the console/notebook):
+    logger.handlers[0].setLevel(logging.WARN)
+
+    # create a handler that uses the StringIO and set its log level:
+    logger_sio = StringIO()
+    handler = logging.StreamHandler(logger_sio)
+    handler.setLevel(logging.INFO)
+    # add the handler to the Python logger:
+    logger.addHandler(handler)
+
+    # Iterate over files
+    res_mols = []
+    messages = []
+    for ct in ct_strs:
+        mol = Chem.MolFromMolBlock(ct)
+        res_mols.append(mol)
+
+        text = logger_sio.getvalue()
+        messages.append(text)
+
+        # reset StringIO object
+        logger_sio.truncate(0)
+        logger_sio.seek(0)
+
+    return res_mols, messages
