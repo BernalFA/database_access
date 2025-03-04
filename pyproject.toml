@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "database_access"
+version = "0.1.0"
+description = "simple access to oracle database"
+authors = [
+    {name = "Dr. Freddy Bernal"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.2.3",
+    "rdkit>=2024.09.5",
+    "openpyxl",
+    "tqdm",
+    "oracledb",
+    "python-dotenv"
+]
+
+[project.urls]
+Repository = "https://github.com/BernalFA/database_access"
