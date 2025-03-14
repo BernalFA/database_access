@@ -8,6 +8,7 @@ information, using a custom SQL expression.
 import logging
 import os
 import re
+import warnings
 from functools import wraps
 from io import StringIO
 from typing import Iterable
@@ -63,9 +64,12 @@ def search_compounds(cursor, identifiers: Iterable[str], sql: str) -> pd.DataFra
         cursor.execute(sql, mybv=id)
         # Fetch result from search
         res = cursor.fetchall()
-        # Transform structural info into str (otherwise are kept as Oracle objects)
-        converted = first_output_to_str(res)  # before closing connection
-        result.append(converted)
+        if res:
+            # Transform structural info into str (otherwise are kept as Oracle objects)
+            converted = first_output_to_str(res)  # before closing connection
+            result.append(converted)
+        else:
+            warnings.warn("No result fetched from identifier: " + id)
 
     result = organize_results(result, sql)
     return result
