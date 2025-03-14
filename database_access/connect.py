@@ -123,7 +123,7 @@ def get_field_names(sql: str) -> list:
     # remove line spaces for re to work
     sql_no_blank = sql.replace("\n", "")
     # search fields
-    match = re.findall("SELECT (.*?)FROM", sql_no_blank)
+    match = re.findall("SELECT(.*?)FROM", sql_no_blank)
     # split fields
     fields = match[0].split(",")
     # retrieve actual field name
