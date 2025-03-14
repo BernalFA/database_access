@@ -81,10 +81,7 @@ def first_output_to_str(data: tuple) -> tuple:
         tuple: collection of properties retrieved from DB as str.
     """
     # we take only the first entry (one container ID)
-    if len(data) != 1:
-        first = data[0]
-    else:
-        first = data
+    first = data[0]
     # Transform structural info into str
     converted = first[:-1] + tuple([str(first[-1])])
 
